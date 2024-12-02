@@ -1,0 +1,145 @@
+:root{
+    --black:#111;
+    --white:#fcf8f3;
+}
+*{
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+body{
+    background-color: var(--white);
+    color:var(--black);
+    margin:0 20%;
+}
+header{
+    width:100%;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+}
+h1{
+    font-size:50px;
+}
+
+main{
+    text-align: center;
+    min-height:50vh;
+}
+#event-list{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items:center;
+}
+button{
+    cursor:pointer;
+    font-size:25px;
+    background-color: transparent;
+    color:var(--black);
+    padding:8px 10px;
+    border:1px solid var(--black);
+    border-radius:20px;
+    margin-left:50px;
+    margin-right:50px;
+    transition:200ms;
+    border-radius: 3px;
+    border:2px solid var(--black);
+    box-shadow:2px 2px 0px 2px #111;
+}
+button:hover{
+    border-radius:4px;
+    transform:scale(1.01) rotate(2deg);
+}
+
+footer{
+    height:50px;
+    text-align: center;
+}
+
+
+input {
+    padding: 8px;
+    font-size: 20px;
+    padding:5px 5px 15px 15px;
+    border-radius: 3px;
+    border:2px solid var(--black);
+    box-shadow:2px 2px 0px 2px #111;
+    align-self: center;
+}
+input:focus{
+    outline: none;
+}
+
+
+.event {
+    text-align: left;
+    margin-bottom: 10px;
+    background-color: #fff;
+    width:300px;
+    padding:5px 5px 15px 15px;
+    border-radius: 3px;
+    border:2px solid var(--black);
+    box-shadow:2px 2px 0 2px #111;
+    cursor:pointer;
+    transition:250ms;
+}
+.event:hover{
+    transform:scale(1.02) rotate(2deg);
+}
+
+
+
+.event p:last-child {
+    margin-left: 20px;
+    font-style: italic;
+    color: #555;
+}
+@media (max-width: 1400px){
+    body {
+        margin: 0 5%; /* Narrower margins for smaller screens */
+    }
+
+    header {
+        grid-template-columns: 1fr; /* Single-column layout */
+        text-align: center; /* Center align the content */
+    }
+
+    h1 {
+        font-size: 35px; /* Adjusted font size for smaller screens */
+    }
+
+    main {
+        padding: 10px; /* Added padding for better spacing on smaller screens */
+    }
+}
+@media (max-width: 1130px){
+    #event-list{
+        display:grid;
+        grid-template-columns: repeat(2, 1fr);
+        text-align: center;
+    }
+}
+@media (max-width: 768px) {
+    main{
+        min-height:42vh;
+    }
+    button {
+        font-size: 20px; /* Smaller button font size */
+        margin: 10px; /* Reduced margin */
+    }
+
+    input {
+        font-size: 20px; /* Smaller input font size */
+        height:40px;
+        width: 80%; /* Full width */
+        box-sizing: border-box;
+        margin-bottom:5px;
+    }
+
+    .event p:last-child {
+        margin-left: 10px; /* Reduced margin for compact display */
+    }
+    #event-list{
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}

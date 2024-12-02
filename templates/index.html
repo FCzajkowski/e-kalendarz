@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Kalendarz</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header>
+        <div></div>
+        <h1>
+            E-Kalendarz
+        </h1>
+        <p>
+            Dzisiaj Jest: <span id="date"></span>
+        </p>
+    </header>
+    <main>
+        <section id="this-week" style="margin-bottom:50px;">
+            <h2>W Tym Tygodniu:</h2>
+            <div id="week-event-list"></div>
+        </section>
+        <h2>Wszystkie Wydarzenia:</h2>
+        <div id="event-list"></div>
+    </main>
+    <footer>
+        <form id="event-form">
+            <button type="submit">Dodaj</button><br><br>
+            <div>
+                <input type="date" id="event-date" required>
+                <input type="text" id="event-title" placeholder="Tytuł" required>
+                <input type="text" id="event-desc" placeholder="Opis" required>
+            </div>
+        </form>
+        <br><br>
+        <div id="delete-section">
+            <button id="delete-event">Usuń</button><br><br>
+            <input type="text" id="delete-title" placeholder="Tytuł do usunięcia" required>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dateElement = document.getElementById("date");
+            const weekEventList = document.getElementById("week-event-list");
+            const eventList = document.getElementById("event-list");
+            const eventForm = document.getElementById("event-form");
+            const deleteEventButton = document.getElementById("delete-event");
+
+            let currentEvents = []; // Track all loaded events
+
+            // Show today's date
+            const today = new Date();
+            const todayISO = today.toISOString().split("T")[0];
+            dateElement.textContent = todayISO;
+
+            // Utility function: Check if a date is in the current week
+            const isThisWeek = (eventDate) => {
+                const eventDateObj = new Date(eventDate);
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay()); // Start of the week (Sunday)
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6); // End of the week (Saturday)
+
+                return eventDateObj >= startOfWeek && eventDateObj <= endOfWeek;
+            };
+
+            // Load events from the server
+            const loadEvents = async () => {
+                const response = await fetch("http://127.0.0.1:5000/events");
+                currentEvents = await response.json();
+
+                // Display "W TYM TYGODNIU" events
+                const thisWeekEvents = currentEvents.filter(event => isThisWeek(event.date));
+                weekEventList.innerHTML = thisWeekEvents.map(
+                    event => `
+                    <div class="event">
+                        <p><strong>${event.date}</strong>: ${event.title} - ${event.desc}</p>
+                    </div>
+                    `
+                ).join("");
+
+                // Display all upcoming events
+                eventList.innerHTML = currentEvents.map(
+                    event => `
+                    <div class="event">
+                        <p><strong>${event.date}</strong>: ${event.title} - ${event.desc}</p>
+                    </div>
+                    `
+                ).join("");
+            };
+
+            // Add event
+            eventForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const date = document.getElementById("event-date").value;
+                const title = document.getElementById("event-title").value.trim();
+                const desc = document.getElementById("event-desc").value.trim();
+
+                if (!date || !title || !desc) {
+                    alert("Wszystkie pola są wymagane!");
+                    return;
+                }
+
+                // Check if the date is in the past
+                const eventDate = new Date(date);
+                if (eventDate < today) {
+                    alert("Nie możesz dodać wydarzenia z przeszłości!");
+                    return;
+                }
+
+                // Check for duplicate title
+                if (currentEvents.some(event => event.title === title)) {
+                    alert("Wydarzenie o tym tytule już istnieje!");
+                    return;
+                }
+
+                const newEvent = { date, title, desc };
+                const response = await fetch("http://127.0.0.1:5000/events", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newEvent),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(errorData.error || "Wystąpił błąd przy dodawaniu wydarzenia.");
+                    return;
+                }
+
+                eventForm.reset();
+                loadEvents();
+            });
+
+            // Delete event by title
+            deleteEventButton.addEventListener("click", async () => {
+                const titleToDelete = document.getElementById("delete-title").value.trim();
+                if (!titleToDelete) {
+                    alert("Proszę podać tytuł do usunięcia.");
+                    return;
+                }
+
+                await fetch(`http://127.0.0.1:5000/delete-event/${titleToDelete}`, {
+                    method: "DELETE",
+                });
+                document.getElementById("delete-title").value = "";
+                loadEvents();
+            });
+
+            // Initial load
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
