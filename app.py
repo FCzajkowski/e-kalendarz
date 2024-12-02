@@ -1,9 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, make_response
 import json
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests for local development
 
 DATA_FILE = "dates.json"
 
@@ -19,6 +17,13 @@ def load_events():
 def save_events(events):
     with open(DATA_FILE, "w") as file:
         json.dump(events, file, indent=4)
+
+# Function to add CORS headers to the response
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"  # Allow all domains, can restrict to specific domain if needed
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
 
 # Route for rendering index.html
 @app.route("/", methods=["GET"])
@@ -40,11 +45,13 @@ def events():
         # Add the new event
         events.append(new_event)
         save_events(events)
-        return jsonify({"message": "Event added successfully!"}), 201
+        response = jsonify({"message": "Event added successfully!"})
+        return add_cors_headers(response), 201
 
     # For GET request, return all events
     events = load_events()
-    return jsonify(events)  # Return events as JSON
+    response = jsonify(events)  # Return events as JSON
+    return add_cors_headers(response)
 
 # Route for deleting an event by title
 @app.route("/delete-event/<string:title>", methods=["DELETE"])
@@ -52,7 +59,8 @@ def delete_event(title):
     events = load_events()
     updated_events = [event for event in events if event["title"] != title]
     save_events(updated_events)
-    return jsonify({"message": "Event deleted successfully!"})
+    response = jsonify({"message": "Event deleted successfully!"})
+    return add_cors_headers(response)
 
 if __name__ == "__main__":
     app.run(debug=True)
